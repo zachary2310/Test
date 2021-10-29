@@ -1,0 +1,50 @@
+exclude: .*?/migrations/
+
+repos:
+  - repo: local
+    hooks:
+      - id: pip-compile-prod
+        name: pip-compile-prod
+        entry: pip-compile requirements/prod.in
+        language: system
+        files: ^requirements/(prod|dev)\.(in|txt)$
+        pass_filenames: false
+
+  
+      - id: pip-compile-dev
+        name: pip-compile-dev
+        entry: pip-compile requirements/dev.in
+        language: system
+        files: ^requirements/(prod|dev)\.(in|txt)$
+        pass_filenames: false
+
+      - id: black
+        name: black
+        entry: black
+        language: system
+        types: [python]
+        args: ["--config=pyproject.toml"]
+
+      - id: isort
+        name: isort
+        entry: isort
+        language: system
+        types: [python]
+        exclude: '^settings.*\.py$'
+        args: ["--settings-path=pyproject.toml"]
+
+      - id: flake8
+        name: flake8
+        args:
+          - "--max-line-length=100"
+        entry: flake8
+        language: system
+        types: [python]
+
+
+      - id: django-check
+        name: Checks the entire Django project for potential problems.
+        entry: sh -c 'python src/manage.py check && python src/manage.py makemigrations --check --dry-run'
+        pass_filenames: false
+        language: system
+        always_run: true
